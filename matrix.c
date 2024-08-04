@@ -3,17 +3,36 @@
 #include <fcntl.h>
 
 void	ft_putchar(char c);
-int		get_line_width(char *buf, int file_size);
-int		get_file_lines_qt(char *buf, int file_size);
+void	ft_putnbr(int nb);
+int		get_file_size();
+int		get_line_width();
+int		get_file_lines_qt();
 
 static const char	*FILE_PATH = "numbers.dict";
 
-void	print_matrix(char **matrix, int lines)
+void	free_m(char **matrix)
+{
+	int i;
+	int rows;
+
+	i = 0;
+	rows = get_file_lines_qt();
+	while (i < rows)
+	{
+		free(matrix[i]);
+		i++;
+	}
+	free (matrix);
+}
+
+void	print_matrix(char **matrix)
 {
 	int		x;
 	int		y;
+	int		lines;
 
 	x = 0;
+	lines = get_file_lines_qt();
 	while (x < lines)
 	{
 		y = 0;
@@ -25,17 +44,19 @@ void	print_matrix(char **matrix, int lines)
 		ft_putchar('\n');
 		x++;
 	}
+	free_m(matrix);
+
 }
 
-void	populate_matrix(char *buf, char **matrix, int file_size)
+char	**populate_matrix(char *buf, char **matrix)
 {
-	int		buf_i;
 	int		x;
 	int		y;
+	int		buf_i;
 	int		lines;
 
 	buf_i = 0;
-	lines = get_file_lines_qt(buf, file_size);
+	lines = get_file_lines_qt();
 	x = 0;
 	while (x < lines)
 	{
@@ -50,29 +71,31 @@ void	populate_matrix(char *buf, char **matrix, int file_size)
 		buf_i++;
 		x++;
 	}
-	print_matrix(matrix, lines);
+	return matrix;
 }
 
-void	create_matrix(int fd, char *buf, char **matrix, int file_size)
+char	**create_matrix(int fd, char *buf)
 {
 	int i;
 	int bytes;
 	int rows;
 	int cols;
+	char **matrix;
 
 	i = 0;
-	buf = (char *)malloc(file_size * sizeof(char));
+	buf = (char *)malloc(get_file_size() * sizeof(char));
 	fd = open(FILE_PATH, O_RDONLY);
-	bytes = read(fd, buf, file_size);
+	bytes = read(fd, buf, get_file_size());
 	buf[bytes] = '\0';
-	rows = get_file_lines_qt(buf, file_size);
-	cols = get_line_width(buf, file_size);
+	rows = get_file_lines_qt();
+	cols = get_line_width();
 	matrix = (char **)malloc(rows * sizeof(char *));
 	while (i < rows)
 	{
         matrix[i] = (char *)malloc(cols * sizeof(char));
 		i++;
 	}
-	populate_matrix(buf, matrix, file_size);
+	close(fd);
+	return (populate_matrix(buf, matrix));
 }
 
