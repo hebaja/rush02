@@ -4,9 +4,9 @@
 
 void	ft_putchar(char c);
 void	ft_putnbr(int nb);
-int		get_file_size();
-int		get_line_width();
-int		get_file_lines_qt();
+int	get_file_size();
+int	get_line_width();
+int	get_file_lines_qt();
 
 static const char	*FILE_PATH = "numbers.dict";
 
@@ -45,7 +45,6 @@ void	print_matrix(char **matrix)
 		x++;
 	}
 	free_m(matrix);
-
 }
 
 char	**populate_matrix(char *buf, char **matrix)
@@ -74,28 +73,43 @@ char	**populate_matrix(char *buf, char **matrix)
 	return matrix;
 }
 
+char	**allocate_matrix(int rows, int cols)
+{
+	int	i;
+	char 	**matrix;
+
+	i = 0;
+	matrix = (char **)malloc(rows * sizeof(char *));
+	if(matrix == NULL)
+		return NULL;
+	while (i < rows)
+	{
+	        matrix[i] = (char *)malloc(cols * sizeof(char));
+		if(matrix[i] == NULL)
+			return NULL;
+		i++;
+	}
+	return (matrix);
+}
+
 char	**create_matrix(int fd, char *buf)
 {
-	int i;
 	int bytes;
 	int rows;
 	int cols;
 	char **matrix;
 
-	i = 0;
 	buf = (char *)malloc(get_file_size() * sizeof(char));
 	fd = open(FILE_PATH, O_RDONLY);
 	bytes = read(fd, buf, get_file_size());
 	buf[bytes] = '\0';
 	rows = get_file_lines_qt();
 	cols = get_line_width();
-	matrix = (char **)malloc(rows * sizeof(char *));
-	while (i < rows)
-	{
-        matrix[i] = (char *)malloc(cols * sizeof(char));
-		i++;
-	}
+	if (buf == NULL || rows < 0 || cols < 0 || fd == -1)
+		return NULL;
+	matrix = allocate_matrix(rows, cols);
 	close(fd);
+	if (matrix == NULL)
+		return NULL;
 	return (populate_matrix(buf, matrix));
 }
-
